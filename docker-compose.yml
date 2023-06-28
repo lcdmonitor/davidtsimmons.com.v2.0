@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis/redis-stack:6.2.6-v6
+    restart: always
+    hostname: redis
+    ports:
+      - 6379:6379
+      - 8001:8001
+    networks:
+      - sandbox
+
+  rabbitmq:
+    image: rabbitmq:3.11.1-management
+    hostname: rabbitmq
+    restart: always
+    ports:
+      - 5673:5673
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - sandbox
+  db:
+    image: mysql:8.0.33
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    networks:
+      - sandbox
+    volumes:
+      - ./storage/mysql-data:/var/lib/mysql
+    ports:
+      - 3306:3306
+
+#https://hub.docker.com/_/phpmyadmin?tab=description
+#https://www.howtogeek.com/devops/how-to-run-phpmyadmin-in-a-docker-container/
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      "PMA_HOST": db
+      "PMA_PASSWORD": ${MYSQL_ROOT_PASSWORD}
+    networks:
+      - sandbox
+    depends_on:
+      - db
+    
+  backend:
+    build: 
+      context: backend
+      dockerfile: "dockerfile"
+    stdin_open: true
+    tty: true
+    privileged: true
+    ports: 
+      - 9000:9000
+    restart: always
+
+networks:
+  sandbox:
+    name: sandbox
+    external: true
