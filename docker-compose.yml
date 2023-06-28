@@ -29,7 +29,7 @@ services:
     networks:
       - sandbox
     volumes:
-      - ./storage/mysql-data:/var/lib/mysql
+      - ~/.docker_storage/davidtsimmons.com/mysql-data:/var/lib/mysql
     ports:
       - 3306:3306
 
