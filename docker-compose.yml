@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   redis:
-    image: redis/redis-stack:6.2.6-v6
+    image: redis/redis-stack:6.2.6-v7
     restart: always
     hostname: redis
     ports:
@@ -58,6 +58,15 @@ services:
     ports: 
       - 9000:9000
     restart: always
+
+  davidtsimmons.com:
+    build: 
+      context: davidtsimmons.com
+      dockerfile: "dockerfile"
+    ports: 
+      - 8088:80
+    restart: always
+
 
 networks:
   sandbox:
