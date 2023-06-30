@@ -1,5 +1,6 @@
 using StackExchange.Redis;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,11 @@ builder.Services.AddStackExchangeRedisCache(redisCacheConfig =>
 {
     redisCacheConfig.ConfigurationOptions = redisConfigurationOptions;
 });
+
+var redis=ConnectionMultiplexer.Connect("redis:6379");
+
+builder.Services.AddDataProtection()
+    .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys");
 
 builder.Services.AddSession(options => {
     options.Cookie.Name = "davidtsimmons.com_session";
