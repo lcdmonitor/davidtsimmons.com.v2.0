@@ -15,6 +15,13 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
+        #region Test Session
+        _logger.LogDebug("Testing Session");
+
+        var value = $"Session written at {DateTime.UtcNow.ToString()}";
+        HttpContext.Session.SetString("Test", value);
+        #endregion
+
         return View();
     }
 
