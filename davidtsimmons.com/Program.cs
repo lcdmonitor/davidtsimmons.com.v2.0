@@ -24,6 +24,16 @@ builder.Services.AddSession(options => {
     options.IdleTimeout = TimeSpan.FromMinutes(60 * 24);
 });
 
+#region Logging
+builder.Services.AddLogging(opt=>
+{
+    opt.AddSimpleConsole(c=>
+    {
+        c.TimestampFormat = "[HH:mm:ss] ";
+    });
+});
+#endregion
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

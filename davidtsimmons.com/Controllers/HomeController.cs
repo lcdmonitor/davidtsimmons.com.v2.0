@@ -2,6 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using davidtsimmons.com.Models;
 
+#region clean me up
+using davidtsimmons.com.Repositories;
+using Newtonsoft.Json;
+#endregion
+
 namespace davidtsimmons.com.Controllers;
 
 public class HomeController : Controller
@@ -20,6 +25,19 @@ public class HomeController : Controller
 
         var value = $"Session written at {DateTime.UtcNow.ToString()}";
         HttpContext.Session.SetString("Test", value);
+        #endregion
+
+        #region mysql test
+        try
+        {
+            var messages = TestRepository.GetMessages();
+
+            _logger.LogInformation(JsonConvert.SerializeObject(messages));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,"Error Getting Messages");
+        }
         #endregion
 
         return View();
