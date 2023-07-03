@@ -29,7 +29,7 @@ builder.Services.AddLogging(opt=>
 {
     opt.AddSimpleConsole(c=>
     {
-        c.TimestampFormat = "[HH:mm:ss] ";
+        c.TimestampFormat = "yyyy-MM-dd [HH:mm:ss] ";
     });
 });
 #endregion
