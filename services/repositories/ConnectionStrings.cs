@@ -6,7 +6,7 @@ namespace services.repositories
         {
             get
             {
-                return "Default";
+                return "MySQL";
             }
         }
     }

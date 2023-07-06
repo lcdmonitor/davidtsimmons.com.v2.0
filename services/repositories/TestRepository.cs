@@ -5,9 +5,6 @@ using Microsoft.Extensions.Logging;
 using contracts;
 
 namespace services.repositories;
-
-
-
 public interface ITestRepository
 {
     public List<Message> GetMessages();
