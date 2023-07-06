@@ -2,14 +2,11 @@ using MySqlConnector;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using contracts;
 
 namespace services.repositories;
 
-public class Message
-{
-    public int Id {get; set;}
-    public string? MessageText {get; set;}
-}
+
 
 public interface ITestRepository
 {
