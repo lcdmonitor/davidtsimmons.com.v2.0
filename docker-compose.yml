@@ -75,8 +75,8 @@ services:
 
   backend:
     build: 
-      context: backend
-      dockerfile: "dockerfile"
+      context: .
+      dockerfile: "./backend/dockerfile"
     stdin_open: true
     tty: true
     privileged: true
@@ -92,8 +92,8 @@ services:
     links:
       - redis
     build: 
-      context: davidtsimmons.com
-      dockerfile: "dockerfile"
+      context: .
+      dockerfile: "./davidtsimmons.com/dockerfile"
     ports: 
       - '5000'
     deploy:

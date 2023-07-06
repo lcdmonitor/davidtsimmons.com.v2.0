@@ -1,21 +1,20 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using davidtsimmons.com.Models;
-
-#region clean me up
-using davidtsimmons.com.Repositories;
 using Newtonsoft.Json;
-#endregion
+using services.repositories;
 
 namespace davidtsimmons.com.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly ITestRepository _testRepository;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, ITestRepository testRepository)
     {
         _logger = logger;
+        _testRepository = testRepository;
     }
 
     public IActionResult Index()
@@ -30,7 +29,7 @@ public class HomeController : Controller
         #region mysql test
         try
         {
-            var messages = TestRepository.GetMessages();
+            var messages = _testRepository.GetMessages();
 
             _logger.LogInformation(JsonConvert.SerializeObject(messages));
         }

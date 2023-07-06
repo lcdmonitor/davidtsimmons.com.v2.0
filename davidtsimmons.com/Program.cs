@@ -1,60 +1,79 @@
 using StackExchange.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.DataProtection;
+using services.repositories;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-
-var redisConfigurationOptions = ConfigurationOptions.Parse("redis:6379");
-
-builder.Services.AddStackExchangeRedisCache(redisCacheConfig =>
+namespace davidtsimmons.com
 {
-    redisCacheConfig.ConfigurationOptions = redisConfigurationOptions;
-});
-
-var redis=ConnectionMultiplexer.Connect("redis:6379");
-
-builder.Services.AddDataProtection()
-    .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys");
-
-builder.Services.AddSession(options => {
-    options.Cookie.Name = "davidtsimmons.com_session";
-    options.IdleTimeout = TimeSpan.FromMinutes(60 * 24);
-});
-
-#region Logging
-builder.Services.AddLogging(opt=>
-{
-    opt.AddSimpleConsole(c=>
+    public class Program
     {
-        c.TimestampFormat = "yyyy-MM-dd [HH:mm:ss] ";
-    });
-});
-#endregion
+        public static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
 
-var app = builder.Build();
+            // Add services to the container.
+            builder.Services.AddControllersWithViews();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+            // setup DI, etc.
+            ConfigureServices(builder.Services);
+
+            var redisConfigurationOptions = ConfigurationOptions.Parse("redis:6379");
+
+            builder.Services.AddStackExchangeRedisCache(redisCacheConfig =>
+            {
+                redisCacheConfig.ConfigurationOptions = redisConfigurationOptions;
+            });
+
+            var redis = ConnectionMultiplexer.Connect("redis:6379");
+
+            builder.Services.AddDataProtection()
+            .PersistKeysToStackExchangeRedis(redis, "DataProtection-Keys");
+
+            builder.Services.AddSession(options =>
+            {
+                options.Cookie.Name = "davidtsimmons.com_session";
+                options.IdleTimeout = TimeSpan.FromMinutes(60 * 24);
+            });
+
+            #region Logging
+            builder.Services.AddLogging(opt =>
+            {
+                opt.AddSimpleConsole(c =>
+                {
+                    c.TimestampFormat = "yyyy-MM-dd [HH:mm:ss] ";
+                });
+            });
+            #endregion
+
+            var app = builder.Build();
+
+            // Configure the HTTP request pipeline.
+            if (!app.Environment.IsDevelopment())
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+
+            app.UseAuthorization();
+
+            app.UseSession();
+
+            app.MapControllerRoute(
+                name: "default",
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+
+            app.Run();
+        }
+
+        public static void ConfigureServices(IServiceCollection services)
+        {
+            services.AddSingleton<ITestRepository, TestRepository>();
+        }
+    }
 }
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-
-app.UseRouting();
-
-app.UseAuthorization();
-
-app.UseSession();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
-app.Run();
