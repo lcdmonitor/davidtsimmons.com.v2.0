@@ -5,17 +5,17 @@ using Microsoft.Extensions.Logging;
 using Contracts;
 
 namespace Services.Repositories;
-public interface ITestRepository
+public interface IMessageRepository
 {
     public List<Message> GetMessages();
 }
 
-public class TestRepository : ITestRepository
+public class MessageRepository : IMessageRepository
 {
     public IConfiguration Configuration { get; }  
-    private readonly ILogger<TestRepository> _logger;  
+    private readonly ILogger<MessageRepository> _logger;  
 
-    public TestRepository(IConfiguration configuration, ILogger<TestRepository> logger)
+    public MessageRepository(IConfiguration configuration, ILogger<MessageRepository> logger)
     {
         Configuration=configuration;
         _logger=logger;

@@ -73,7 +73,7 @@ namespace davidtsimmons.com
 
         public static void ConfigureServices(IServiceCollection Services)
         {
-            Services.AddSingleton<ITestRepository, TestRepository>();
+            Services.AddSingleton<IMessageRepository, MessageRepository>();
         }
     }
 }

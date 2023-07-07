@@ -2,19 +2,19 @@
 using Microsoft.AspNetCore.Mvc;
 using davidtsimmons.com.Models;
 using Newtonsoft.Json;
-using Services.Repositories;
+using Services;
 
 namespace davidtsimmons.com.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
-    private readonly ITestRepository _testRepository;
+    private readonly IMessageService _messageService;
 
-    public HomeController(ILogger<HomeController> logger, ITestRepository testRepository)
+    public HomeController(ILogger<HomeController> logger, IMessageService messageService)
     {
         _logger = logger;
-        _testRepository = testRepository;
+        _messageService = messageService;
     }
 
     public IActionResult Index()
@@ -29,7 +29,7 @@ public class HomeController : Controller
         #region mysql test
         try
         {
-            var messages = _testRepository.GetMessages();
+            var messages = _messageService.GetAllMessages();
 
             _logger.LogInformation(JsonConvert.SerializeObject(messages));
         }
