@@ -1,4 +1,4 @@
-namespace services.repositories
+namespace Services.Repositories
 {
     public static class ConnectionStrings
     {

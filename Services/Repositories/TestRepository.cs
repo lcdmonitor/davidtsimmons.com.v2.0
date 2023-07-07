@@ -2,9 +2,9 @@ using MySqlConnector;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using contracts;
+using Contracts;
 
-namespace services.repositories;
+namespace Services.Repositories;
 public interface ITestRepository
 {
     public List<Message> GetMessages();

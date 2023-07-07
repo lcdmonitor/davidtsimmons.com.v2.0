@@ -1,7 +1,7 @@
 using StackExchange.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.DataProtection;
-using services.repositories;
+using Services.Repositories;
 
 namespace davidtsimmons.com
 {
@@ -11,7 +11,7 @@ namespace davidtsimmons.com
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // Add Services to the container.
             builder.Services.AddControllersWithViews();
 
             // setup DI, etc.
@@ -71,9 +71,9 @@ namespace davidtsimmons.com
             app.Run();
         }
 
-        public static void ConfigureServices(IServiceCollection services)
+        public static void ConfigureServices(IServiceCollection Services)
         {
-            services.AddSingleton<ITestRepository, TestRepository>();
+            Services.AddSingleton<ITestRepository, TestRepository>();
         }
     }
 }

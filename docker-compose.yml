@@ -76,7 +76,7 @@ services:
   backend:
     build: 
       context: .
-      dockerfile: "./backend/dockerfile"
+      dockerfile: "./Backend/dockerfile"
     stdin_open: true
     tty: true
     privileged: true

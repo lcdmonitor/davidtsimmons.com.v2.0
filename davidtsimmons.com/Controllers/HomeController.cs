@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using davidtsimmons.com.Models;
 using Newtonsoft.Json;
-using services.repositories;
+using Services.Repositories;
 
 namespace davidtsimmons.com.Controllers;
 
