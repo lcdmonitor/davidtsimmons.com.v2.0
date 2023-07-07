@@ -1,10 +1,31 @@
 version: '3.8'
 
 services:
+  nginx:
+    image: nginx:alpine
+    hostname: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/proxy.conf:/etc/nginx/proxy.conf:ro
+      - ~/.nginx/logs/:/var/logs/nginx/
+    ports:
+      - '8088:80'
+    depends_on:
+      - davidtsimmons.com
+    restart: always
+    networks:
+      - sandbox
+
+
   redis:
-    image: redis/redis-stack:6.2.6-v6
+    image: redis/redis-stack:6.2.6-v7
     restart: always
     hostname: redis
+    volumes:
+      #- ./config/redis/redis-stack.conf:/redis-stack.conf
+      - ~/.docker_storage/davidtsimmons.com/redis-data:/data
+    environment:
+      - REDIS_ARGS=--save 60 1 --appendonly yes #1200 32 save every 60s if at least one change, local dev only
     ports:
       - 6379:6379
       - 8001:8001
@@ -15,14 +36,18 @@ services:
     image: rabbitmq:3.11.1-management
     hostname: rabbitmq
     restart: always
+    volumes:
+      - ~/.docker_storage/davidtsimmons.com/rabbitmq-data:/var/lib/rabbitmq
     ports:
       - 5673:5673
       - 5672:5672
       - 15672:15672
     networks:
       - sandbox
+
   db:
     image: mysql:8.0.33
+    hostname: mysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -47,17 +72,40 @@ services:
       - sandbox
     depends_on:
       - db
-    
+
   backend:
     build: 
-      context: backend
-      dockerfile: "dockerfile"
+      context: .
+      dockerfile: "./Backend/dockerfile"
     stdin_open: true
     tty: true
     privileged: true
     ports: 
       - 9000:9000
     restart: always
+    networks:
+      - sandbox
+    depends_on:
+      - redis
+
+  davidtsimmons.com:
+    links:
+      - redis
+    build: 
+      context: .
+      dockerfile: "./davidtsimmons.com/dockerfile"
+    ports: 
+      - '5000'
+    deploy:
+      replicas: 3
+    networks:
+      - sandbox
+    depends_on:
+      - redis
+      - db
+      - backend
+    restart: always
+
 
 networks:
   sandbox:
