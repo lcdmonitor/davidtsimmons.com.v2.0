@@ -2,6 +2,7 @@ using StackExchange.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.DataProtection;
 using Services.Repositories;
+using Services;
 
 namespace davidtsimmons.com
 {
@@ -73,6 +74,7 @@ namespace davidtsimmons.com
 
         public static void ConfigureServices(IServiceCollection Services)
         {
+            Services.AddSingleton<IMessageService, MessageService>();
             Services.AddSingleton<IMessageRepository, MessageRepository>();
         }
     }
