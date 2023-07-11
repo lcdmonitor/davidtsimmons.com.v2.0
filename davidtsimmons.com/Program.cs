@@ -3,6 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.DataProtection;
 using Services.Repositories;
 using Services;
+using Microsoft.AspNetCore.Identity;
+using davidtsimmons.com.Models;
+using davidtsimmons.com.Services;
 
 namespace davidtsimmons.com
 {
@@ -72,10 +75,21 @@ namespace davidtsimmons.com
             app.Run();
         }
 
-        public static void ConfigureServices(IServiceCollection Services)
+        public static void ConfigureServices(IServiceCollection services)
         {
-            Services.AddSingleton<IMessageService, MessageService>();
-            Services.AddSingleton<IMessageRepository, MessageRepository>();
+            //Dependency Injection Setup
+            services.AddSingleton<IMessageService, MessageService>();
+            services.AddSingleton<IMessageRepository, MessageRepository>();
+
+            //Setup Authentication/Authorization
+            services.AddTransient<IUserStore<ApplicationUser>, UserStore>();
+            services.AddTransient<IRoleStore<ApplicationRole>, RoleStore>();
+
+            services.AddIdentity<ApplicationUser, ApplicationRole>()
+                .AddDefaultTokenProviders();
+
+            // Add application services.
+            services.AddTransient<IEmailSender, EmailSender>();
         }
     }
 }
