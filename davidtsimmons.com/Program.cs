@@ -6,6 +6,7 @@ using Services;
 using Microsoft.AspNetCore.Identity;
 using davidtsimmons.com.Models;
 using davidtsimmons.com.Services;
+using davidtsimmons.com.Log;
 
 namespace davidtsimmons.com
 {
@@ -77,6 +78,11 @@ namespace davidtsimmons.com
 
         public static void ConfigureServices(IServiceCollection services)
         {
+            //Default Logging Injection
+            var serviceProvider = services.BuildServiceProvider();
+            var logger = serviceProvider.GetService<ILogger<ApplicationLogs>>();
+            services.AddSingleton(typeof(ILogger), logger);
+
             //Dependency Injection Setup
             services.AddSingleton<IMessageService, MessageService>();
             services.AddSingleton<IMessageRepository, MessageRepository>();
