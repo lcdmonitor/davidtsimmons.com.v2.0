@@ -2,9 +2,11 @@ using Services.Repositories;
 using Contracts;
 using Microsoft.Extensions.Logging;
 using Contracts.Authentication;
+using TanvirArjel.Extensions.Microsoft.DependencyInjection;
 
 namespace Services;
 
+[ScopedService]
 public interface IApplicationRoleService
 {
     public Task<IEnumerable<ApplicationRole>> GetAllRolesAsync();

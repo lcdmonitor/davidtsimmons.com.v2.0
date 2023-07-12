@@ -2,9 +2,11 @@ using Services.Repositories;
 using Contracts;
 using Microsoft.Extensions.Logging;
 using Contracts.Authentication;
+using TanvirArjel.Extensions.Microsoft.DependencyInjection;
 
 namespace Services;
 
+[ScopedService]
 public interface IApplicationUserService
 {
     public Task<IEnumerable<ApplicationUser>> GetAllUsersAsync();

@@ -2,9 +2,11 @@ using Services.Repositories;
 using Contracts;
 using Microsoft.Extensions.Logging;
 using Contracts.Message;
+using TanvirArjel.Extensions.Microsoft.DependencyInjection;
 
 namespace Services;
 
+[ScopedService]
 public interface IMessageService
 {
     public Task<IEnumerable<Message>> GetAllMessagesAsync();

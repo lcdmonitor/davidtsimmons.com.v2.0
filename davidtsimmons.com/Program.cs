@@ -9,6 +9,7 @@ using davidtsimmons.com.Services;
 using davidtsimmons.com.Log;
 using davidtsimmons.com.Authentication;
 using Contracts.Authentication;
+using TanvirArjel.Extensions.Microsoft.DependencyInjection;
 
 namespace davidtsimmons.com
 {
@@ -81,13 +82,8 @@ namespace davidtsimmons.com
         public static void ConfigureServices(IServiceCollection services)
         {
             //Dependency Injection Setup
-            services.AddSingleton<IMessageService, MessageService>();
-            services.AddSingleton<IMessageRepository, MessageRepository>();
-            services.AddSingleton<IApplicationRoleService, ApplicationRoleService>();
-            services.AddSingleton<IApplicationRoleRepository, ApplicationRoleRepository>();
-            services.AddSingleton<IApplicationUserService, ApplicationUserService>();
-            services.AddSingleton<IApplicationUserRepository, ApplicationUserRepository>();
-
+            //https://github.com/TanvirArjel/TanvirArjel.Extensions.Microsoft.DependencyInjection
+            services.AddServicesOfAllTypes();
 
             //Setup Authentication/Authorization
             services.AddTransient<IUserStore<ApplicationUser>, UserStore>();

@@ -3,8 +3,11 @@ using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Contracts.Authentication;
+using TanvirArjel.Extensions.Microsoft.DependencyInjection;
 
 namespace Services.Repositories;
+
+[ScopedService]
 public interface IApplicationUserRepository
 {
     Task<IEnumerable<ApplicationUser>> GetApplicationUsersAsync();

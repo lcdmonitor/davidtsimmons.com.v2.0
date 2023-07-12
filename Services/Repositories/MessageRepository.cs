@@ -4,8 +4,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Contracts.Authentication;
 using Contracts.Message;
+using TanvirArjel.Extensions.Microsoft.DependencyInjection;
 
 namespace Services.Repositories;
+
+[ScopedService]
 public interface IMessageRepository
 {
     Task<IEnumerable<Message>> GetMessagesAsync();
