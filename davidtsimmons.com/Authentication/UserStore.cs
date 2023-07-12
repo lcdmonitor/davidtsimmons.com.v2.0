@@ -1,42 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Dapper;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using davidtsimmons.com.Models;
+﻿using Microsoft.AspNetCore.Identity;
+using Contracts.Authentication;
+using Services;
 
-namespace davidtsimmons.com.Models
+namespace davidtsimmons.com.Authentication
 {
     public class UserStore : IUserStore<ApplicationUser>, IUserEmailStore<ApplicationUser>, IUserPhoneNumberStore<ApplicationUser>,
         IUserTwoFactorStore<ApplicationUser>, IUserPasswordStore<ApplicationUser>, IUserRoleStore<ApplicationUser>
     {
-        private readonly string _connectionString;
-        private readonly ILogger _logger;
+        private readonly ILogger<UserStore> _logger;
+        private readonly IApplicationUserService _applicationUserService;
 
-        public UserStore(IConfiguration configuration, ILogger logger)
+        public UserStore(ILogger<UserStore> logger, IApplicationUserService applicationUserService)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
             _logger=logger;
+            _applicationUserService = applicationUserService;
         }
 
         public async Task<IdentityResult> CreateAsync(ApplicationUser user, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            // using (var connection = new SqlConnection(_connectionString))
-            // {
-            //     await connection.OpenAsync(cancellationToken);
-            //     user.Id = await connection.QuerySingleAsync<int>($@"INSERT INTO [ApplicationUser] ([UserName], [NormalizedUserName], [Email],
-            //         [NormalizedEmail], [EmailConfirmed], [PasswordHash], [PhoneNumber], [PhoneNumberConfirmed], [TwoFactorEnabled])
-            //         VALUES (@{nameof(ApplicationUser.UserName)}, @{nameof(ApplicationUser.NormalizedUserName)}, @{nameof(ApplicationUser.Email)},
-            //         @{nameof(ApplicationUser.NormalizedEmail)}, @{nameof(ApplicationUser.EmailConfirmed)}, @{nameof(ApplicationUser.PasswordHash)},
-            //         @{nameof(ApplicationUser.PhoneNumber)}, @{nameof(ApplicationUser.PhoneNumberConfirmed)}, @{nameof(ApplicationUser.TwoFactorEnabled)});
-            //         SELECT CAST(SCOPE_IDENTITY() as int)", user);
-            // }
+            var newUser = await _applicationUserService.CreateApplicationUserAsync(user);
 
             return IdentityResult.Success;
         }

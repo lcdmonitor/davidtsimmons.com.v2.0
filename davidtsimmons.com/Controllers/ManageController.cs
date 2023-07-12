@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using davidtsimmons.com.Models;
 using davidtsimmons.com.Models.ManageViewModels;
 using davidtsimmons.com.Services;
+using Contracts.Authentication;
 
 namespace davidtsimmons.com.Controllers
 {
@@ -124,13 +118,13 @@ namespace davidtsimmons.com.Controllers
             var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
             var email = user.Email;
 
-            if (!string.IsNullOrEmpty(email))
+            if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(callbackUrl))
             {
                 await _emailSender.SendEmailConfirmationAsync(email, callbackUrl);
             }
             else
             {
-                throw new Exception("User Email not specified");
+                throw new Exception("User Email not specified, or confirmation link not generated successfully");
             }
 
             StatusMessage = "Verification email sent. Please check your email.";

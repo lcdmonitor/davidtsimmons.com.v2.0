@@ -2,33 +2,38 @@ using MySqlConnector;
 using Dapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Contracts;
+using Contracts.Authentication;
+using Contracts.Message;
 
 namespace Services.Repositories;
 public interface IMessageRepository
 {
-    public List<Message> GetMessages();
+    Task<IEnumerable<Message>> GetMessagesAsync();
 }
 
 public class MessageRepository : IMessageRepository
 {
-    public IConfiguration Configuration { get; }  
-    private readonly ILogger<MessageRepository> _logger;  
+    public IConfiguration Configuration { get; }
+    private readonly ILogger<MessageRepository> _logger;
 
     public MessageRepository(IConfiguration configuration, ILogger<MessageRepository> logger)
     {
-        Configuration=configuration;
-        _logger=logger;
+        Configuration = configuration;
+        _logger = logger;
     }
 
-    public List<Message> GetMessages()
+    public async Task<IEnumerable<Message>> GetMessagesAsync()
     {
         _logger.LogInformation("Getting Messages");
-        
-        var connection = new MySqlConnection(Configuration.GetConnectionString(ConnectionStrings.MySqlConnectionStringSection));
 
-        var messages = connection.Query<Message>("Select Id, MessageText from messages");
+        IEnumerable<Message> messages;
 
-        return messages.ToList<Message>();
+        using (var connection = new MySqlConnection(Configuration.GetConnectionString(ConnectionStrings.MySqlConnectionStringSection)))
+        {
+            await connection.OpenAsync();
+            messages = await connection.QueryAsync<Message>("Select Id, MessageText from messages");
+        }
+
+        return messages;
     }
 }

@@ -1,23 +1,27 @@
 using Services.Repositories;
 using Contracts;
+using Microsoft.Extensions.Logging;
+using Contracts.Message;
 
 namespace Services;
 
 public interface IMessageService
 {
-    public List<Message> GetAllMessages();
+    public Task<IEnumerable<Message>> GetAllMessagesAsync();
 }
 
 public class MessageService : IMessageService
 {
     private readonly IMessageRepository _messageRepository;
-    public MessageService(IMessageRepository messageRepository)
+    private readonly ILogger<MessageService> _logger;
+    public MessageService(IMessageRepository messageRepository, ILogger<MessageService> logger)
     {
         _messageRepository=messageRepository;
+        _logger=logger;
     }
 
-    public List<Message> GetAllMessages()
+    public Task<IEnumerable<Message>> GetAllMessagesAsync()
     {
-        return _messageRepository.GetMessages();
+        return _messageRepository.GetMessagesAsync();
     }
 }

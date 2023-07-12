@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace davidtsimmons.com.Models
+namespace Contracts.Authentication
 {
     public class ApplicationRole
     {

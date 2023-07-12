@@ -1,25 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Dapper;
+﻿using Contracts.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using davidtsimmons.com.Models;
+using Services;
 
-namespace davidtsimmons.com.Models
+namespace davidtsimmons.com.Authentication
 {
     public class RoleStore : IRoleStore<ApplicationRole>
     {
-        private readonly string? _connectionString;
-        private readonly ILogger _logger;
+        private readonly ILogger<RoleStore> _logger;
+        private readonly IApplicationRoleService _applicationRoleService;
 
-        public RoleStore(IConfiguration configuration, ILogger logger)
+        public RoleStore(ILogger<RoleStore> logger, IApplicationRoleService applicationRoleService)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
             _logger = logger;
+            _applicationRoleService = applicationRoleService;
         }
 
         public async Task<IdentityResult> CreateAsync(ApplicationRole role, CancellationToken cancellationToken)

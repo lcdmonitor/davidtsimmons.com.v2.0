@@ -13,6 +13,8 @@ using Microsoft.Extensions.Options;
 using davidtsimmons.com.Models;
 using davidtsimmons.com.Models.AccountViewModels;
 using davidtsimmons.com.Services;
+using davidtsimmons.com.Authentication;
+using Contracts.Authentication;
 
 namespace davidtsimmons.com.Controllers
 {
@@ -231,6 +233,12 @@ namespace davidtsimmons.com.Controllers
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
                     var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+
+                    if(string.IsNullOrEmpty(callbackUrl))
+                    {
+                        throw new Exception("email confirmation link not generated properly");
+                    }
+
                     await _emailSender.SendEmailConfirmationAsync(model.Email, callbackUrl);
 
                     await _signInManager.SignInAsync(user, isPersistent: false);

@@ -1,4 +1,4 @@
-﻿namespace Contracts;
+﻿namespace Contracts.Message;
 
 public class Message
 {

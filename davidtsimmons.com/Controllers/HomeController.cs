@@ -17,7 +17,7 @@ public class HomeController : Controller
         _messageService = messageService;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
         #region Test Session
         _logger.LogInformation("Testing Session: " + HttpContext.Session.Id);
@@ -29,7 +29,7 @@ public class HomeController : Controller
         #region mysql test
         try
         {
-            var messages = _messageService.GetAllMessages();
+            var messages = await _messageService.GetAllMessagesAsync();
 
             _logger.LogInformation(JsonConvert.SerializeObject(messages));
         }

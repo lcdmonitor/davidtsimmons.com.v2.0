@@ -1,0 +1,67 @@
+using MySqlConnector;
+using Dapper;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Contracts.Authentication;
+
+namespace Services.Repositories;
+public interface IApplicationUserRepository
+{
+    Task<IEnumerable<ApplicationUser>> GetApplicationUsersAsync();
+
+    Task<ApplicationUser> CreateApplicationUserAsync(ApplicationUser applicationUser);
+}
+
+public class ApplicationUserRepository : IApplicationUserRepository
+{
+    public IConfiguration Configuration { get; }
+    private readonly ILogger<ApplicationUserRepository> _logger;
+
+    public ApplicationUserRepository(IConfiguration configuration, ILogger<ApplicationUserRepository> logger)
+    {
+        Configuration = configuration;
+        _logger = logger;
+    }
+
+    public Task<IEnumerable<ApplicationUser>> GetApplicationUsersAsync()
+    {
+        _logger.LogInformation("Getting ApplicationUsers");
+
+        using (var connection = new MySqlConnection(Configuration.GetConnectionString(ConnectionStrings.MySqlConnectionStringSection)))
+        {
+            return connection.QueryAsync<ApplicationUser>("Select Id, ApplicationUserText from messages");
+        }
+    }
+
+    public async Task<ApplicationUser> CreateApplicationUserAsync(ApplicationUser applicationUser)
+    {
+        _logger.LogInformation("Creating Application User Record for {Username}", applicationUser.UserName);
+
+        try
+        {
+            using (var connection = new MySqlConnection(Configuration.GetConnectionString(ConnectionStrings.MySqlConnectionStringSection)))
+            {
+                 _logger.LogInformation("Inserting Application User Record for {Username}", applicationUser.UserName);
+                
+                await connection.OpenAsync();
+
+                var id = await connection.QuerySingleAsync<int>($@"INSERT INTO `ApplicationUser` (`UserName`, `NormalizedUserName`, `Email`,
+                    `NormalizedEmail`, `PasswordHash`, `PhoneNumber`)
+                    VALUES (@{nameof(ApplicationUser.UserName)}, @{nameof(ApplicationUser.NormalizedUserName)}, @{nameof(ApplicationUser.Email)},
+                    @{nameof(ApplicationUser.NormalizedEmail)}, @{nameof(ApplicationUser.PasswordHash)},
+                    @{nameof(ApplicationUser.PhoneNumber)});
+                    SELECT LAST_INSERT_ID();", applicationUser);
+
+                applicationUser.Id = id;
+
+                return applicationUser;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error Creating User");
+        }
+
+        return applicationUser;
+    }
+}
