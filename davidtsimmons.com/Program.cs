@@ -81,7 +81,11 @@ namespace davidtsimmons.com
             //Default Logging Injection
             var serviceProvider = services.BuildServiceProvider();
             var logger = serviceProvider.GetService<ILogger<ApplicationLogs>>();
-            services.AddSingleton(typeof(ILogger), logger);
+            
+            if(logger!=null)
+            {
+                services.AddSingleton(typeof(ILogger), logger);
+            }
 
             //Dependency Injection Setup
             services.AddSingleton<IMessageService, MessageService>();

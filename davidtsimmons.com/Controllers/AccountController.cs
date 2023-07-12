@@ -38,11 +38,11 @@ namespace davidtsimmons.com.Controllers
         }
 
         [TempData]
-        public string ErrorMessage { get; set; }
+        public string? ErrorMessage { get; set; }
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Login(string returnUrl = null)
+        public async Task<IActionResult> Login(string? returnUrl = null)
         {
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
@@ -54,17 +54,19 @@ namespace davidtsimmons.com.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && model is not null)
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+
+                var result = !string.IsNullOrEmpty(model.Email) && !string.IsNullOrEmpty(model.Password) ? await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false) : Microsoft.AspNetCore.Identity.SignInResult.Failed;
+                
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
+                    _logger.LogInformation("User {email} logged in.", model.Email);
                     return RedirectToLocal(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
@@ -89,7 +91,7 @@ namespace davidtsimmons.com.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> LoginWith2fa(bool rememberMe, string returnUrl = null)
+        public async Task<IActionResult> LoginWith2fa(bool rememberMe, string? returnUrl = null)
         {
             // Ensure the user has gone through the username & password screen first
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
@@ -108,7 +110,7 @@ namespace davidtsimmons.com.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoginWith2fa(LoginWith2faViewModel model, bool rememberMe, string returnUrl = null)
+        public async Task<IActionResult> LoginWith2fa(LoginWith2faViewModel model, bool rememberMe, string? returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
@@ -121,7 +123,7 @@ namespace davidtsimmons.com.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            var authenticatorCode = model.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
+            var authenticatorCode = !string.IsNullOrEmpty(model.TwoFactorCode) ? model.TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty) : String.Empty;
 
             var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(authenticatorCode, rememberMe, model.RememberMachine);
 
@@ -145,7 +147,7 @@ namespace davidtsimmons.com.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> LoginWithRecoveryCode(string returnUrl = null)
+        public async Task<IActionResult> LoginWithRecoveryCode(string? returnUrl = null)
         {
             // Ensure the user has gone through the username & password screen first
             var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
@@ -162,7 +164,7 @@ namespace davidtsimmons.com.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LoginWithRecoveryCode(LoginWithRecoveryCodeViewModel model, string returnUrl = null)
+        public async Task<IActionResult> LoginWithRecoveryCode(LoginWithRecoveryCodeViewModel model, string? returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
@@ -175,7 +177,7 @@ namespace davidtsimmons.com.Controllers
                 throw new ApplicationException($"Unable to load two-factor authentication user.");
             }
 
-            var recoveryCode = model.RecoveryCode.Replace(" ", string.Empty);
+            var recoveryCode = !string.IsNullOrEmpty(model.RecoveryCode) ? model.RecoveryCode.Replace(" ", string.Empty) : String.Empty;
 
             var result = await _signInManager.TwoFactorRecoveryCodeSignInAsync(recoveryCode);
 
@@ -206,7 +208,7 @@ namespace davidtsimmons.com.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Register(string returnUrl = null)
+        public IActionResult Register(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             return View();
@@ -215,10 +217,10 @@ namespace davidtsimmons.com.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
+        public async Task<IActionResult> Register(RegisterViewModel model, string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && !string.IsNullOrEmpty(model.Email) && !string.IsNullOrEmpty(model.Password))
             {
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -254,7 +256,7 @@ namespace davidtsimmons.com.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public IActionResult ExternalLogin(string provider, string returnUrl = null)
+        public IActionResult ExternalLogin(string provider, string? returnUrl = null)
         {
             // Request a redirect to the external login provider.
             var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
@@ -264,7 +266,7 @@ namespace davidtsimmons.com.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null, string? remoteError = null)
         {
             if (remoteError != null)
             {
@@ -301,9 +303,9 @@ namespace davidtsimmons.com.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model, string returnUrl = null)
+        public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginViewModel model, string? returnUrl = null)
         {
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && !string.IsNullOrEmpty(model.Email))
             {
                 // Get the information about the user from the external login provider
                 var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -359,7 +361,7 @@ namespace davidtsimmons.com.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && !string.IsNullOrEmpty(model.Email))
             {
                 var user = await _userManager.FindByEmailAsync(model.Email);
                 if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
@@ -390,7 +392,7 @@ namespace davidtsimmons.com.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult ResetPassword(string code = null)
+        public IActionResult ResetPassword(string? code = null)
         {
             if (code == null)
             {
@@ -405,7 +407,7 @@ namespace davidtsimmons.com.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid || string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Code) || string.IsNullOrEmpty(model.Password))
             {
                 return View(model);
             }
@@ -448,7 +450,7 @@ namespace davidtsimmons.com.Controllers
             }
         }
 
-        private IActionResult RedirectToLocal(string returnUrl)
+        private IActionResult RedirectToLocal(string? returnUrl)
         {
             if (Url.IsLocalUrl(returnUrl))
             {

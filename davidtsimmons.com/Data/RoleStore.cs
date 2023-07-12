@@ -111,7 +111,7 @@ namespace davidtsimmons.com.Models
             //         WHERE [Id] = @{nameof(roleId)}", new { roleId });
             // }
 
-            return new ApplicationRole() { Id = 1, Name = "User" };
+            return new ApplicationRole() { Id = 1, Name = "User", NormalizedName="user" };
         }
 
         public async Task<ApplicationRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
@@ -125,7 +125,7 @@ namespace davidtsimmons.com.Models
             //         WHERE [NormalizedName] = @{nameof(normalizedRoleName)}", new { normalizedRoleName });
             // }
 
-            return new ApplicationRole() { Id = 1, Name = "user" };
+            return new ApplicationRole() { Id = 1, Name = "User", NormalizedName="user"};
         }
 
         public void Dispose()

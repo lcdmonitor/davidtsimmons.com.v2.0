@@ -43,7 +43,7 @@ namespace davidtsimmons.com.Controllers
         }
 
         [TempData]
-        public string StatusMessage { get; set; }
+        public string? StatusMessage { get; set; }
 
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -123,7 +123,15 @@ namespace davidtsimmons.com.Controllers
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
             var email = user.Email;
-            await _emailSender.SendEmailConfirmationAsync(email, callbackUrl);
+
+            if (!string.IsNullOrEmpty(email))
+            {
+                await _emailSender.SendEmailConfirmationAsync(email, callbackUrl);
+            }
+            else
+            {
+                throw new Exception("User Email not specified");
+            }
 
             StatusMessage = "Verification email sent. Please check your email.";
             return RedirectToAction(nameof(Index));
@@ -163,16 +171,20 @@ namespace davidtsimmons.com.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
-            if (!changePasswordResult.Succeeded)
+            if (!string.IsNullOrEmpty(model.OldPassword) && !string.IsNullOrEmpty(model.NewPassword) && model != null)
             {
-                AddErrors(changePasswordResult);
-                return View(model);
-            }
+                var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                if (!changePasswordResult.Succeeded)
+                {
+                    AddErrors(changePasswordResult);
+                    return View(model);
+                }
 
-            await _signInManager.SignInAsync(user, isPersistent: false);
-            _logger.LogInformation("User changed their password successfully.");
-            StatusMessage = "Your password has been changed.";
+
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                _logger.LogInformation("User changed their password successfully.");
+                StatusMessage = "Your password has been changed.";
+            }
 
             return RedirectToAction(nameof(ChangePassword));
         }
@@ -212,15 +224,18 @@ namespace davidtsimmons.com.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            var addPasswordResult = await _userManager.AddPasswordAsync(user, model.NewPassword);
-            if (!addPasswordResult.Succeeded)
+            if (model != null && !string.IsNullOrEmpty(model.NewPassword))
             {
-                AddErrors(addPasswordResult);
-                return View(model);
-            }
+                var addPasswordResult = await _userManager.AddPasswordAsync(user, model.NewPassword);
+                if (!addPasswordResult.Succeeded)
+                {
+                    AddErrors(addPasswordResult);
+                    return View(model);
+                }
 
-            await _signInManager.SignInAsync(user, isPersistent: false);
-            StatusMessage = "Your password has been set.";
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                StatusMessage = "Your password has been set.";
+            }
 
             return RedirectToAction(nameof(SetPassword));
         }
@@ -295,14 +310,18 @@ namespace davidtsimmons.com.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
-            var result = await _userManager.RemoveLoginAsync(user, model.LoginProvider, model.ProviderKey);
-            if (!result.Succeeded)
+            if (!string.IsNullOrEmpty(model.LoginProvider) && !string.IsNullOrEmpty(model.ProviderKey))
             {
-                throw new ApplicationException($"Unexpected error occurred removing external login for user with ID '{user.Id}'.");
+                var result = await _userManager.RemoveLoginAsync(user, model.LoginProvider, model.ProviderKey);
+                if (!result.Succeeded)
+                {
+                    throw new ApplicationException($"Unexpected error occurred removing external login for user with ID '{user.Id}'.");
+                }
+
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                StatusMessage = "The external login was removed.";
             }
 
-            await _signInManager.SignInAsync(user, isPersistent: false);
-            StatusMessage = "The external login was removed.";
             return RedirectToAction(nameof(ExternalLogins));
         }
 
@@ -378,13 +397,20 @@ namespace davidtsimmons.com.Controllers
                 unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
             }
 
-            var model = new EnableAuthenticatorViewModel
+            if (!string.IsNullOrEmpty(unformattedKey) && !string.IsNullOrEmpty(user.Email))
             {
-                SharedKey = FormatKey(unformattedKey),
-                AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey)
-            };
+                var model = new EnableAuthenticatorViewModel
+                {
+                    SharedKey = FormatKey(unformattedKey),
+                    AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey)
+                };
 
-            return View(model);
+                return View(model);
+            }
+            else
+            {
+                throw new Exception("key or email not specified");
+            }
         }
 
         [HttpPost]
@@ -403,7 +429,8 @@ namespace davidtsimmons.com.Controllers
             }
 
             // Strip spaces and hypens
-            var verificationCode = model.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
+            
+            var verificationCode = !string.IsNullOrEmpty(model.Code) ? model.Code.Replace(" ", string.Empty).Replace("-", string.Empty) : String.Empty;
 
             var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(
                 user, _userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
@@ -457,7 +484,7 @@ namespace davidtsimmons.com.Controllers
             }
 
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
-            var model = new GenerateRecoveryCodesViewModel { RecoveryCodes = recoveryCodes.ToArray() };
+            var model = new GenerateRecoveryCodesViewModel { RecoveryCodes = recoveryCodes!=null ? recoveryCodes.ToArray() : null };
 
             _logger.LogInformation("User with ID {UserId} has generated new 2FA recovery codes.", user.Id);
 
