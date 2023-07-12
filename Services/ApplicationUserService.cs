@@ -8,7 +8,11 @@ namespace Services;
 public interface IApplicationUserService
 {
     public Task<IEnumerable<ApplicationUser>> GetAllUsersAsync();
-    public Task<ApplicationUser> CreateApplicationUserAsync(ApplicationUser applicationUser);
+    public Task<ApplicationUser> CreateApplicationUserAsync(ApplicationUser applicationUser, CancellationToken cancellationToken);
+
+    public Task<ApplicationUser> FindByIdAsync(string userId, CancellationToken cancellationToken);
+
+    public Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken);
 }
 
 public class ApplicationUserService : IApplicationUserService
@@ -26,8 +30,18 @@ public class ApplicationUserService : IApplicationUserService
         return _applicationUserRepository.GetApplicationUsersAsync();
     }
 
-    public Task<ApplicationUser> CreateApplicationUserAsync(ApplicationUser applicationUser)
+    public Task<ApplicationUser> CreateApplicationUserAsync(ApplicationUser applicationUser, CancellationToken cancellationToken)
     {
-        return _applicationUserRepository.CreateApplicationUserAsync(applicationUser);
+        return _applicationUserRepository.CreateApplicationUserAsync(applicationUser, cancellationToken);
+    }
+
+    public Task<ApplicationUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
+    {
+        return _applicationUserRepository.FindByIdAsync(userId, cancellationToken);
+    }
+
+    public Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
+    {
+        return _applicationUserRepository.FindByNameAsync(normalizedUserName, cancellationToken);
     }
 }

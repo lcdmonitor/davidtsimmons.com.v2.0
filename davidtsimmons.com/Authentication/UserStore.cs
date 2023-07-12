@@ -20,7 +20,7 @@ namespace davidtsimmons.com.Authentication
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var newUser = await _applicationUserService.CreateApplicationUserAsync(user);
+            var newUser = await _applicationUserService.CreateApplicationUserAsync(user, cancellationToken);
 
             return IdentityResult.Success;
         }
@@ -42,28 +42,15 @@ namespace davidtsimmons.com.Authentication
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            // using (var connection = new SqlConnection(_connectionString))
-            // {
-            //     await connection.OpenAsync(cancellationToken);
-            //     return await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM [ApplicationUser]
-            //         WHERE [Id] = @{nameof(userId)}", new { userId });
-            // }
 
-            return new ApplicationUser() {UserName="dave"};
+            return await _applicationUserService.FindByIdAsync(userId, cancellationToken);
         }
 
         public async Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            //using (var connection = new SqlConnection(_connectionString))
-            // {
-            //     await connection.OpenAsync(cancellationToken);
-            //     return await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM [ApplicationUser]
-            //         WHERE [NormalizedUserName] = @{nameof(normalizedUserName)}", new { normalizedUserName });
-            // }
-
-            return new ApplicationUser() {UserName="dave"};
+            return await _applicationUserService.FindByNameAsync(normalizedUserName, cancellationToken);
         }
 
         public Task<string> GetNormalizedUserNameAsync(ApplicationUser user, CancellationToken cancellationToken)

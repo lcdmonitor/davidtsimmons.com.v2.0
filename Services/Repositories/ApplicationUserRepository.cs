@@ -9,7 +9,9 @@ public interface IApplicationUserRepository
 {
     Task<IEnumerable<ApplicationUser>> GetApplicationUsersAsync();
 
-    Task<ApplicationUser> CreateApplicationUserAsync(ApplicationUser applicationUser);
+    Task<ApplicationUser> CreateApplicationUserAsync(ApplicationUser applicationUser, CancellationToken cancellationToken);
+    Task<ApplicationUser> FindByIdAsync(string userId, CancellationToken cancellationToken);
+    Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken);
 }
 
 public class ApplicationUserRepository : IApplicationUserRepository
@@ -33,7 +35,7 @@ public class ApplicationUserRepository : IApplicationUserRepository
         }
     }
 
-    public async Task<ApplicationUser> CreateApplicationUserAsync(ApplicationUser applicationUser)
+    public async Task<ApplicationUser> CreateApplicationUserAsync(ApplicationUser applicationUser, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Creating Application User Record for {Username}", applicationUser.UserName);
 
@@ -43,7 +45,7 @@ public class ApplicationUserRepository : IApplicationUserRepository
             {
                  _logger.LogInformation("Inserting Application User Record for {Username}", applicationUser.UserName);
                 
-                await connection.OpenAsync();
+                await connection.OpenAsync(cancellationToken);
 
                 var id = await connection.QuerySingleAsync<int>($@"INSERT INTO `ApplicationUser` (`UserName`, `NormalizedUserName`, `Email`,
                     `NormalizedEmail`, `PasswordHash`, `PhoneNumber`)
@@ -63,5 +65,25 @@ public class ApplicationUserRepository : IApplicationUserRepository
         }
 
         return applicationUser;
+    }
+
+    public async Task<ApplicationUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
+    {
+        using (var connection = new MySqlConnection(Configuration.GetConnectionString(ConnectionStrings.MySqlConnectionStringSection)))
+        {
+            await connection.OpenAsync(cancellationToken);
+            return await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM `ApplicationUser`
+                WHERE `Id` = @{nameof(userId)}", new { userId });
+        }
+    }
+
+    public async Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
+    {
+        using (var connection = new MySqlConnection(Configuration.GetConnectionString(ConnectionStrings.MySqlConnectionStringSection)))
+        {
+            await connection.OpenAsync(cancellationToken);
+            return await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM `ApplicationUser`
+                WHERE `NormalizedUserName` = @{nameof(normalizedUserName)}", new { normalizedUserName });
+        }
     }
 }
