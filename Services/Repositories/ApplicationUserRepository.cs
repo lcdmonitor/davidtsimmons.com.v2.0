@@ -15,6 +15,7 @@ public interface IApplicationUserRepository
     Task<ApplicationUser> CreateApplicationUserAsync(ApplicationUser applicationUser, CancellationToken cancellationToken);
     Task<ApplicationUser> FindByIdAsync(string userId, CancellationToken cancellationToken);
     Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken);
+    Task DeleteApplicationUserAsync(ApplicationUser user, CancellationToken cancellationToken);
 }
 
 public class ApplicationUserRepository : IApplicationUserRepository
@@ -87,6 +88,15 @@ public class ApplicationUserRepository : IApplicationUserRepository
             await connection.OpenAsync(cancellationToken);
             return await connection.QuerySingleOrDefaultAsync<ApplicationUser>($@"SELECT * FROM `ApplicationUser`
                 WHERE `NormalizedUserName` = @{nameof(normalizedUserName)}", new { normalizedUserName });
+        }
+    }
+
+    public async Task DeleteApplicationUserAsync(ApplicationUser user, CancellationToken cancellationToken)
+    {
+        using (var connection = new MySqlConnection(Configuration.GetConnectionString(ConnectionStrings.MySqlConnectionStringSection)))
+        {
+            await connection.OpenAsync(cancellationToken);
+            await connection.ExecuteAsync($"DELETE FROM `ApplicationUser` WHERE `Id` = @{nameof(ApplicationUser.Id)}", user);
         }
     }
 }

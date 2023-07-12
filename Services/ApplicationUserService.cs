@@ -15,6 +15,7 @@ public interface IApplicationUserService
     public Task<ApplicationUser> FindByIdAsync(string userId, CancellationToken cancellationToken);
 
     public Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken);
+    public Task DeleteApplicationUserAsync(ApplicationUser user, CancellationToken cancellationToken);
 }
 
 public class ApplicationUserService : IApplicationUserService
@@ -45,5 +46,10 @@ public class ApplicationUserService : IApplicationUserService
     public Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
     {
         return _applicationUserRepository.FindByNameAsync(normalizedUserName, cancellationToken);
+    }
+
+    public Task DeleteApplicationUserAsync(ApplicationUser user, CancellationToken cancellationToken)
+    {
+        return _applicationUserRepository.DeleteApplicationUserAsync(user, cancellationToken);
     }
 }

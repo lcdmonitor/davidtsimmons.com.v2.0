@@ -29,11 +29,7 @@ namespace davidtsimmons.com.Authentication
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            // using (var connection = new SqlConnection(_connectionString))
-            // {
-            //     await connection.OpenAsync(cancellationToken);
-            //     await connection.ExecuteAsync($"DELETE FROM [ApplicationUser] WHERE [Id] = @{nameof(ApplicationUser.Id)}", user);
-            // }
+            await _applicationUserService.DeleteApplicationUserAsync(user, cancellationToken);
 
             return IdentityResult.Success;
         }
