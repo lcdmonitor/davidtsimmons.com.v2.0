@@ -34,7 +34,7 @@ public class MessageRepository : IMessageRepository
         using (var connection = new MySqlConnection(Configuration.GetConnectionString(ConnectionStrings.MySqlConnectionStringSection)))
         {
             await connection.OpenAsync();
-            messages = await connection.QueryAsync<Message>("Select Id, MessageText from messages");
+            messages = await connection.QueryAsync<Message>("Select Id, MessageText from Messages");
         }
 
         return messages;
