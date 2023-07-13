@@ -2,6 +2,7 @@
 using System.Text;
 using DbUp;
 using DbUp.ScriptProviders;
+using Database.Services;
 
 namespace Database
 {
@@ -10,6 +11,38 @@ namespace Database
         public static int Main(string[] args)
         {
             Console.WriteLine("DbUP - Database Migrations and deployments");
+
+            IEnvironmentVariableProvider environmentVariableProvider = new EnvironmentVariableProvider();
+
+            string? mysqlHostName = environmentVariableProvider.GetEnvironmentVariable("MYSQL_HOSTNAME");
+            string? mysqlRootPassword = environmentVariableProvider.GetEnvironmentVariable("MYSQL_ROOT_PASSWORD");
+
+            bool abort=false;
+
+            if(string.IsNullOrEmpty(mysqlHostName))
+            {
+                Console.WriteLine("MYSQL_HOSTNAME environment variable not set");
+                abort=true;
+            }
+
+            if(string.IsNullOrEmpty(mysqlRootPassword))
+            {
+                Console.WriteLine("MYSQL_ROOT_PASSWORD environment variable not set");
+                abort=true;
+            }
+
+            if(abort)
+            {
+                Console.WriteLine("Aborting...");
+                return 500;
+            }
+
+            Console.WriteLine("Host Name: {0}", mysqlHostName);
+            Console.WriteLine("Password: {0}", mysqlRootPassword);
+
+            Console.WriteLine("Waiting 30seconds for DB to come up...");
+            Thread.Sleep(30000);
+            Console.WriteLine("Proceeding..");
 
             var options = new FileSystemScriptOptions
             {
@@ -27,7 +60,7 @@ namespace Database
 
             var connectionString =
     args.FirstOrDefault()
-    ?? "Server=127.0.0.1;User ID=root;Password=London123!;Database=davidtsimmons.com";
+    ?? string.Format("Server={0};User ID=root;Password={1};Database=davidtsimmons.com", mysqlHostName, mysqlRootPassword);
 
             var upgrader =
                 DeployChanges.To

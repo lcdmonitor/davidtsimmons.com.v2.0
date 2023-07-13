@@ -79,7 +79,6 @@ services:
       dockerfile: "./Backend/dockerfile"
     stdin_open: true
     tty: true
-    privileged: true
     ports: 
       - 9000:9000
     restart: always
@@ -87,6 +86,23 @@ services:
       - sandbox
     depends_on:
       - redis
+      - db
+      - dbup
+
+  dbup:
+    build: 
+      context: .
+      dockerfile: "./Database/dockerfile"
+    stdin_open: true
+    tty: true
+    environment:
+      MYSQL_HOSTNAME: ${MYSQL_HOSTNAME}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}    
+    networks:
+      - sandbox
+    depends_on:
+      - db
+      - phpmyadmin
 
   davidtsimmons.com:
     links:
@@ -103,6 +119,7 @@ services:
     depends_on:
       - redis
       - db
+      - dbup
       - backend
     restart: always
 

@@ -36,6 +36,63 @@
                 "${workspaceFolder}/Backend/Backend.csproj"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "type": "docker-build",
+            "label": "docker-build: debug",
+            "dependsOn": [
+                "build"
+            ],
+            "dockerBuild": {
+                "tag": "davidtsimmonscomv20:dev",
+                "target": "base",
+                "dockerfile": "${workspaceFolder}/davidtsimmons.com/dockerfile",
+                "context": "${workspaceFolder}",
+                "pull": true
+            },
+            "netCore": {
+                "appProject": "${workspaceFolder}/davidtsimmons.com/davidtsimmons.com.csproj"
+            }
+        },
+        {
+            "type": "docker-build",
+            "label": "docker-build: release",
+            "dependsOn": [
+                "build"
+            ],
+            "dockerBuild": {
+                "tag": "davidtsimmonscomv20:latest",
+                "dockerfile": "${workspaceFolder}/davidtsimmons.com/dockerfile",
+                "context": "${workspaceFolder}",
+                "platform": "linux/amd64",
+                "pull": true
+            },
+            "netCore": {
+                "appProject": "${workspaceFolder}/davidtsimmons.com/davidtsimmons.com.csproj"
+            }
+        },
+        {
+            "type": "docker-run",
+            "label": "docker-run: debug",
+            "dependsOn": [
+                "docker-build: debug"
+            ],
+            "dockerRun": {},
+            "netCore": {
+                "appProject": "${workspaceFolder}/davidtsimmons.com/davidtsimmons.com.csproj",
+                "enableDebugging": true
+            }
+        },
+        {
+            "type": "docker-run",
+            "label": "docker-run: release",
+            "dependsOn": [
+                "docker-build: release"
+            ],
+            "dockerRun": {},
+            "netCore": {
+                "appProject": "${workspaceFolder}/davidtsimmons.com/davidtsimmons.com.csproj"
+            }
         }
     ]
 }

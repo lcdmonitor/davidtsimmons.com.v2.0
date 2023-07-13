@@ -248,6 +248,7 @@ namespace davidtsimmons.com.Authentication
         public async Task<bool> IsInRoleAsync(ApplicationUser user, string roleName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            _logger.LogInformation("Determining if User: {username} is in Role: {rolename}",user.UserName, roleName);
 
             // using (var connection = new SqlConnection(_connectionString))
             // {
@@ -258,7 +259,7 @@ namespace davidtsimmons.com.Authentication
                 
             //     return matchingRoles > 0;
             // }
-
+            
             return true;
         }
 
@@ -266,6 +267,7 @@ namespace davidtsimmons.com.Authentication
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            _logger.LogInformation("Determining which users are in role: {rolename}", roleName);
             // using (var connection = new SqlConnection(_connectionString))
             // {
             //     var queryResults = await connection.QueryAsync<ApplicationUser>("SELECT u.* FROM [ApplicationUser] u " +
