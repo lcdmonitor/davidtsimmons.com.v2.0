@@ -10,6 +10,7 @@ using davidtsimmons.com.Log;
 using davidtsimmons.com.Authentication;
 using Contracts.Authentication;
 using TanvirArjel.Extensions.Microsoft.DependencyInjection;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace davidtsimmons.com
 {
@@ -53,14 +54,32 @@ namespace davidtsimmons.com
             });
             #endregion
 
+            #region reverse proxy setup
+            //https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-7.0
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.All;
+            });
+            #endregion
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
+
+                //https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-7.0
+                app.UseForwardedHeaders();
+
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
+            }
+            else
+            {
+                app.UseDeveloperExceptionPage();
+                //https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-7.0
+                app.UseForwardedHeaders();
             }
 
             app.UseHttpsRedirection();
@@ -85,12 +104,22 @@ namespace davidtsimmons.com
             //https://github.com/TanvirArjel/TanvirArjel.Extensions.Microsoft.DependencyInjection
             services.AddServicesOfAllTypes();
 
-            //Setup Authentication/Authorization
+            #region Setup Authentication/Authorization
             services.AddTransient<IUserStore<ApplicationUser>, UserStore>();
             services.AddTransient<IRoleStore<ApplicationRole>, RoleStore>();
 
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = $"/Account/Login";
+                options.LogoutPath = $"/Account/Logout";
+                options.AccessDeniedPath = $"/Account/AccessDenied";
+            });
+
+            #endregion
+
             services.AddIdentity<ApplicationUser, ApplicationRole>()
-                .AddDefaultTokenProviders();
+                .AddDefaultTokenProviders()
+                .AddRoles<ApplicationRole>();
 
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
