@@ -93,8 +93,10 @@ services:
     build: 
       context: .
       dockerfile: "./Database/dockerfile"
-    stdin_open: true
-    tty: true
+    restart: always
+    hostname: dbup
+    ports: 
+      - 9001:9001
     environment:
       MYSQL_HOSTNAME: ${MYSQL_HOSTNAME}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}    

@@ -13,4 +13,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:7.0
 WORKDIR /App
 COPY --from=build-env /App/davidtsimmons.com/bin/out .
 ENV ASPNETCORE_URLS http://*:5000
-ENTRYPOINT ["dotnet", "davidtsimmons.com.dll"]
+ENTRYPOINT ["./entrypoint.sh"]

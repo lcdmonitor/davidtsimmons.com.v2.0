@@ -3,11 +3,17 @@ using System.Text;
 using DbUp;
 using DbUp.ScriptProviders;
 using Database.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Database.CustomLogging;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Database
 {
     public class Program
     {
+        private static InMemoryUpgradeLog _inMemoryUpgradeLog = new InMemoryUpgradeLog();
         public static int Main(string[] args)
         {
             Console.WriteLine("DbUP - Database Migrations and deployments");
@@ -17,21 +23,21 @@ namespace Database
             string? mysqlHostName = environmentVariableProvider.GetEnvironmentVariable("MYSQL_HOSTNAME");
             string? mysqlRootPassword = environmentVariableProvider.GetEnvironmentVariable("MYSQL_ROOT_PASSWORD");
 
-            bool abort=false;
+            bool abort = false;
 
-            if(string.IsNullOrEmpty(mysqlHostName))
+            if (string.IsNullOrEmpty(mysqlHostName))
             {
                 Console.WriteLine("MYSQL_HOSTNAME environment variable not set");
-                abort=true;
+                abort = true;
             }
 
-            if(string.IsNullOrEmpty(mysqlRootPassword))
+            if (string.IsNullOrEmpty(mysqlRootPassword))
             {
                 Console.WriteLine("MYSQL_ROOT_PASSWORD environment variable not set");
-                abort=true;
+                abort = true;
             }
 
-            if(abort)
+            if (abort)
             {
                 Console.WriteLine("Aborting...");
                 return 500;
@@ -39,10 +45,6 @@ namespace Database
 
             Console.WriteLine("Host Name: {0}", mysqlHostName);
             Console.WriteLine("Password: {0}", mysqlRootPassword);
-
-            Console.WriteLine("Waiting 30seconds for DB to come up...");
-            Thread.Sleep(30000);
-            Console.WriteLine("Proceeding..");
 
             var options = new FileSystemScriptOptions
             {
@@ -68,6 +70,7 @@ namespace Database
                     //.WithScriptsEmbeddedInAssembly(Assembly.GetExecutingAssembly())
                     .WithScriptsFromFileSystem("Scripts", options)
                     .LogToConsole()
+                    .LogTo(_inMemoryUpgradeLog)
                     .Build();
 
             var result = upgrader.PerformUpgrade();
@@ -85,9 +88,22 @@ namespace Database
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Success!");
+            Console.WriteLine("Starting Success Listener");
             Console.ResetColor();
 
+            new WebHostBuilder().UseKestrel().Configure(Configure).UseUrls(environmentVariableProvider.GetEnvironmentVariable("ASPNETCORE_URLS")).Build().Run();
             return 0;
+        }
+
+        static public void Configure(IApplicationBuilder app)
+        {
+            app.Run(async (context) =>
+            {
+                Console.WriteLine("UP Request Received: {0}", context.Request.Path);
+
+                context.Response.StatusCode = 200;
+                await context.Response.WriteAsync(JsonConvert.SerializeObject(_inMemoryUpgradeLog.GetLogEntries()));
+            });
         }
     }
 }
