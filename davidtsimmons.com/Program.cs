@@ -6,7 +6,7 @@ using Services;
 using Microsoft.AspNetCore.Identity;
 using davidtsimmons.com.Models;
 using davidtsimmons.com.Services;
-using davidtsimmons.com.Log;
+using davidtsimmons.com.CustomLogging;
 using davidtsimmons.com.Authentication;
 using Contracts.Authentication;
 using TanvirArjel.Extensions.Microsoft.DependencyInjection;
