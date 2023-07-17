@@ -9,7 +9,7 @@ services:
       - ./nginx/proxy.conf:/etc/nginx/proxy.conf:ro
       - ~/.nginx/logs/:/var/logs/nginx/
     ports:
-      - '8088:80'
+      - ${WEB_APPLICATION_PORTS}
     depends_on:
       - davidtsimmons.com
     restart: always
