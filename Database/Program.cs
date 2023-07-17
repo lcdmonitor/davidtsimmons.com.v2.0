@@ -64,6 +64,10 @@ namespace Database
     args.FirstOrDefault()
     ?? string.Format("Server={0};User ID=root;Password={1};Database=davidtsimmons.com", mysqlHostName, mysqlRootPassword);
 
+            //create database if need be:
+            EnsureDatabase.For.MySqlDatabase(connectionString);
+
+
             var upgrader =
                 DeployChanges.To
                     .MySqlDatabase(connectionString)
