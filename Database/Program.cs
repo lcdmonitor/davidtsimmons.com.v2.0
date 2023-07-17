@@ -62,7 +62,7 @@ namespace Database
 
             var connectionString =
     args.FirstOrDefault()
-    ?? string.Format("Server={0};User ID=root;Password={1};Database=davidtsimmons.com", mysqlHostName, mysqlRootPassword);
+    ?? string.Format("Server={0};User ID=root;Password={1};Database=davidtsimmonscom", mysqlHostName, mysqlRootPassword);
 
             //create database if need be:
             EnsureDatabase.For.MySqlDatabase(connectionString);

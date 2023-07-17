@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS `davidtsimmons.com`.`ApplicationUser` (
+CREATE TABLE IF NOT EXISTS `ApplicationUser` (
     `Id` INT NOT NULL AUTO_INCREMENT,
     `UserName` VARCHAR(255) NOT NULL,
     `NormalizedUserName` VARCHAR(255) NOT NULL,
