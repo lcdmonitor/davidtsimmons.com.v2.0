@@ -6,7 +6,7 @@ then
     ENV_FILE=env.prod
     echo Production environment Start
 else
-    ENV_FILE=env.prod
+    ENV_FILE=env.dev
     echo Local Dev environment Start
 fi
 

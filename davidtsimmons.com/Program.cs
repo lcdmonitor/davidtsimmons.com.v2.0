@@ -22,6 +22,7 @@ namespace davidtsimmons.com
 
             // Add Services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddControllers();
 
             // setup DI, etc.
             ConfigureServices(builder.Services);
@@ -90,6 +91,8 @@ namespace davidtsimmons.com
             app.UseAuthorization();
 
             app.UseSession();
+
+            app.MapControllers();
 
             app.MapControllerRoute(
                 name: "default",
