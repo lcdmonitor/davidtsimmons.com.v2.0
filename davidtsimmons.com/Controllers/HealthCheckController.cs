@@ -1,6 +1,7 @@
 using davidtsimmons.com.Models.HealthCheckModels;
 using Microsoft.AspNetCore.Mvc;
 using Services;
+using Newtonsoft.Json;
 
 namespace davidtsimmons.com.Controllers
 {
@@ -25,6 +26,8 @@ namespace davidtsimmons.com.Controllers
             //load balancer support
             string forwardedFor = Request.HttpContext.Request.Headers["X-Forwarded-For"].ToString();
             string clientIP = Request.HttpContext.Connection.RemoteIpAddress is not null ? Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString() : String.Empty;
+
+            _logger.LogInformation("Headers {0}",JsonConvert.SerializeObject(Request.HttpContext.Request.Headers));
 
             var remoteIpAddress = string.IsNullOrEmpty(forwardedFor) ? clientIP : forwardedFor;
 
